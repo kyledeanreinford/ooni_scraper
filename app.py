@@ -17,22 +17,9 @@ def check_ooni() -> int:
     page = urllib.request.urlopen(url)
     soup = BeautifulSoup(page, "html.parser")
     price_box = soup.find("div", attrs={"class": "price"})
-    price_string = re.search(r'\$\d\d\d.\d\d', price_box.get_text())
-    price = round(float(price_string.group()[1:]))
-
-    sale_price_box = soup.find("span", attrs={"class": "price__item price__item--sale price__item--last text-ml"})
-    sale_price = None
-    if sale_price_box is not None:
-        sale_price_string = re.search(r'\$\d\d\d.\d\d', sale_price_box.get_text())
-        sale_price = round(float(sale_price_string.group()[1:]))
-
-    return sale_price if sale_price is not None else price
-
-def check_ooni_bundle() -> int:
-    url = "https://ooni.com/products/ooni-koda-16-pizza-peel-bundle?variant=41740124749921"
-    page = urllib.request.urlopen(url)
-    soup = BeautifulSoup(page, "html.parser")
-    price_box = soup.find("div", attrs={"class": "price"})
+    if price_box is None:
+        print("Error: price_box was not found on the page")
+        exit(1)
     price_string = re.search(r'\$\d\d\d.\d\d', price_box.get_text())
     price = round(float(price_string.group()[1:]))
 
@@ -53,7 +40,5 @@ def send_message(message: str):
 if __name__ == "__main__":
     if check_ooni() < 599:
         send_message(f"Check for the Koda 16 price on https://ooni.com/products/ooni-koda-16?variant=40170656432225. Looks like the price is {check_ooni()}")
-    elif check_ooni_bundle() < 629:
-        send_message(f"Check for the Koda 16 price on https://ooni.com/products/ooni-koda-16-pizza-peel-bundle?variant=41740124749921. The peel bundle is {check_ooni_bundle()}")
     else:
         send_message(message=f"No sales right now! Last checked at {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
